@@ -169,6 +169,7 @@ func create(ctx context.Context, s *service, r *taskAPI.CreateTaskRequest) (*con
 	}
 
 	containerType, err := oci.ContainerType(*ociSpec)
+	logrus.WithField("type", containerType).Info("Create container type")
 	if err != nil {
 		return nil, err
 	}
@@ -180,10 +181,12 @@ func create(ctx context.Context, s *service, r *taskAPI.CreateTaskRequest) (*con
 	if err != nil {
 		return nil, err
 	}
-
+	logrus.WithFields(logrus.Fields{"id": r.ID, "type": containerType}).Info("before switch")
 	switch containerType {
 	case vc.PodSandbox, vc.SingleContainer:
+		logrus.Info("podsandbox case")
 		if s.sandbox != nil {
+			logrus.WithField("return", 1).Info("create exit")
 			return nil, fmt.Errorf("cannot create another sandbox in sandbox: %s", s.sandbox.ID())
 		}
 		// We can provide additional directories where to search for
@@ -194,6 +197,7 @@ func create(ctx context.Context, s *service, r *taskAPI.CreateTaskRequest) (*con
 		//
 		_, err = withCDI(ociSpec.Annotations, []string{}, ociSpec)
 		if err != nil {
+			logrus.WithField("return", 2).Info("create exit")
 			return nil, fmt.Errorf("adding CDI devices failed")
 		}
 
@@ -209,6 +213,7 @@ func create(ctx context.Context, s *service, r *taskAPI.CreateTaskRequest) (*con
 		}
 		_, err = katatrace.CreateTracer("kata", jaegerConfig)
 		if err != nil {
+			logrus.WithField("return", 3).Info("create exit")
 			return nil, err
 		}
 
@@ -238,6 +243,7 @@ func create(ctx context.Context, s *service, r *taskAPI.CreateTaskRequest) (*con
 		}
 
 		if rootFs.Mounted, err = checkAndMount(s, r); err != nil {
+			logrus.WithField("return", 4).Info("create exit")
 			return nil, err
 		}
 
@@ -253,6 +259,7 @@ func create(ctx context.Context, s *service, r *taskAPI.CreateTaskRequest) (*con
 		rootless.SetRootless(s.config.HypervisorConfig.Rootless)
 		if rootless.IsRootless() {
 			if err := configureNonRootHypervisor(s.config, r.ID); err != nil {
+				logrus.WithField("return", 5).Info("create exit")
 				return nil, err
 			}
 		}
@@ -263,11 +270,14 @@ func create(ctx context.Context, s *service, r *taskAPI.CreateTaskRequest) (*con
 		//
 		sandbox, _, err := katautils.CreateSandbox(s.ctx, vci, *ociSpec, *s.config, rootFs, r.ID, bundlePath, disableOutput, false)
 		if err != nil {
+			logrus.WithError(err).Info("*failure in create()")
+			logrus.WithField("return", 6).Info("create exit")
 			return nil, err
 		}
 		s.sandbox = sandbox
 		pid, err := s.sandbox.GetHypervisorPid()
 		if err != nil {
+			logrus.WithField("return", 7).Info("create exit")
 			return nil, err
 		}
 		s.hpid = uint32(pid)
@@ -277,14 +287,17 @@ func create(ctx context.Context, s *service, r *taskAPI.CreateTaskRequest) (*con
 		}
 
 	case vc.PodContainer:
+		logrus.Info("podcontainer case")
 		span, ctx := katatrace.Trace(s.ctx, shimLog, "create", shimTracingTags)
 		defer span.End()
 
 		if s.sandbox == nil {
+			logrus.WithField("return", 8).Info("create exit")
 			return nil, fmt.Errorf("BUG: Cannot start the container, since the sandbox hasn't been created")
 		}
 
 		if rootFs.Mounted, err = checkAndMount(s, r); err != nil {
+			logrus.WithField("return", 9).Info("create exit")
 			return nil, err
 		}
 
@@ -298,15 +311,18 @@ func create(ctx context.Context, s *service, r *taskAPI.CreateTaskRequest) (*con
 
 		_, err = katautils.CreateContainer(ctx, s.sandbox, *ociSpec, rootFs, r.ID, bundlePath, disableOutput, runtimeConfig.DisableGuestEmptyDir)
 		if err != nil {
+			logrus.WithField("return", 10).Info("create exit")
 			return nil, err
 		}
 	}
 
 	container, err := newContainer(s, r, containerType, ociSpec, rootFs.Mounted)
 	if err != nil {
+		logrus.WithField("return", 11).Info("create exit")
 		return nil, err
 	}
 
+	logrus.WithField("return", 12).Info("create exit")
 	return container, nil
 }
 

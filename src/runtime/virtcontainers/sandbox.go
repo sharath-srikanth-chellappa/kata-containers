@@ -1370,7 +1370,7 @@ func (s *Sandbox) startVM(ctx context.Context, prestartHookFunc func(context.Con
 	span, ctx := katatrace.Trace(ctx, s.Logger(), "startVM", sandboxTracingTags, map[string]string{"sandbox_id": s.id})
 	defer span.End()
 
-	s.Logger().Info("Starting VM")
+	s.Logger().Info("Starting VM test")
 
 	if s.config.HypervisorConfig.Debug {
 		// create console watcher
@@ -1383,6 +1383,7 @@ func (s *Sandbox) startVM(ctx context.Context, prestartHookFunc func(context.Con
 
 	defer func() {
 		if err != nil {
+			s.Logger().Infof("Stopping VM in startVM() %s", err)
 			s.hypervisor.StopVM(ctx, false)
 		}
 	}()
@@ -1406,6 +1407,7 @@ func (s *Sandbox) startVM(ctx context.Context, prestartHookFunc func(context.Con
 				AgentConfig:      s.config.AgentConfig,
 			})
 			if err != nil {
+				s.Logger().Infof("Network error 1 %s", err)
 				return err
 			}
 
@@ -1414,12 +1416,27 @@ func (s *Sandbox) startVM(ctx context.Context, prestartHookFunc func(context.Con
 
 		return s.hypervisor.StartVM(ctx, VmStartTimeout)
 	}); err != nil {
+		s.Logger().Infof("Network error 2 %s", err)
 		return err
 	}
 
+<<<<<<< HEAD
 	if caps.IsNetworkDeviceHotplugSupported() && prestartHookFunc != nil {
 		err = s.runPrestartHooks(ctx, prestartHookFunc)
+=======
+	// not sure how we know that this callback has been executed
+	if s.config.HypervisorConfig.ConfidentialGuest && s.config.HypervisorConfig.GuestPreAttestation {
+		if err := s.hypervisor.AttestVM(ctx); err != nil {
+			s.Logger().Infof("Error 1 %s", err)
+			return err
+		}
+	}
+
+	if prestartHookFunc != nil {
+		hid, err := s.GetHypervisorPid()
+>>>>>>> 1452cbb1b (initial commit, end of internship)
 		if err != nil {
+			s.Logger().Infof("Error 2 %s", err)
 			return err
 		}
 	}
@@ -1438,7 +1455,7 @@ func (s *Sandbox) startVM(ctx context.Context, prestartHookFunc func(context.Con
 		}
 	}
 
-	s.Logger().Info("VM started")
+	s.Logger().Info("VM started a")
 
 	if s.cw != nil {
 		s.Logger().Debug("console watcher starts")
@@ -1452,19 +1469,21 @@ func (s *Sandbox) startVM(ctx context.Context, prestartHookFunc func(context.Con
 	// we want to guarantee that it is manageable.
 	// For that we need to ask the agent to start the
 	// sandbox inside the VM.
-	if err := s.agent.startSandbox(ctx, s); err != nil {
-		return err
-	}
+	// if err := s.agent.startSandbox(ctx, s); err != nil {
+	// 	return err
+	// }
 
-	s.Logger().Info("Agent started in the sandbox")
+	// s.Logger().Info("Agent started in the sandbox")
 
-	defer func() {
-		if err != nil {
-			if e := s.agent.stopSandbox(ctx, s); e != nil {
-				s.Logger().WithError(e).WithField("sandboxid", s.id).Warning("Agent did not stop sandbox")
-			}
-		}
-	}()
+	// defer func() {
+	// 	if err != nil {
+	// 		if e := s.agent.stopSandbox(ctx, s); e != nil {
+	// 			s.Logger().WithError(e).WithField("sandboxid", s.id).Warning("Agent did not stop sandbox")
+	// 		}
+	// 	}
+	// }()
+
+	s.Logger().Info("VM started b")
 
 	return nil
 }
