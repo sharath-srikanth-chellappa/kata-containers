@@ -577,6 +577,9 @@ type HypervisorConfig struct {
 	// Size of virtqueues
 	VirtioFSQueueSize uint32
 
+	// Name of Volume
+	VolumeName string
+
 	// User ID.
 	Uid uint32
 
@@ -677,6 +680,11 @@ type HypervisorConfig struct {
 
 	// PolicyHash is the digest of the workload policy
 	PolicyHash string
+	SandboxID  string
+
+	SEVCertChainPath string
+	SEVGuestPolicy   uint32
+	SNPGuestPolicy   uint64
 }
 
 // vcpu mapping from vcpu number to thread number
@@ -1103,6 +1111,8 @@ type Hypervisor interface {
 
 	// If wait is set, don't actively stop the sandbox:
 	// just perform cleanup.
+	// StopVM(ctx context.Context, waitOnly bool) error
+	// Sharath: new code
 	StopVM(ctx context.Context, waitOnly bool) error
 	PauseVM(ctx context.Context) error
 	SaveVM() error

@@ -40,6 +40,9 @@ const (
 	// IgvmPath is a sandbox annotation for passing a per container path pointing at the guest image and kernel that will run in the container VM.
 	IgvmPath = kataAnnotHypervisorPrefix + "igvm"
 
+	// VolumeName is a sandbox annotation for passing a per container name pointing at the guest volume that will attach to the container VM.
+	VolumeName = kataAnnotHypervisorPrefix + "volume_name"
+
 	// InitrdPath is a sandbox annotation for passing a per container path pointing at the guest initrd image that will run in the container VM.
 	InitrdPath = kataAnnotHypervisorPrefix + "initrd"
 
