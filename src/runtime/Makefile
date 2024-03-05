@@ -104,8 +104,8 @@ GENERATED_VARS = \
 		CONFIG_QEMU_TDX_IN \
 		CONFIG_QEMU_SNP_IN \
 		CONFIG_CLH_IN \
-		CONFIG_FC_IN \
 		CONFIG_CLH_SNP_IN \
+		CONFIG_FC_IN \
 		CONFIG_STRATOVIRT_IN \
 		CONFIG_REMOTE_IN \
 		$(USER_VARS)
@@ -274,12 +274,6 @@ DEFBINDMOUNTS := []
 # Image Service Offload
 DEFSERVICEOFFLOAD ?= false
 
-# SNP
-DEFSNPGUEST ?= false
-# Based on SEV Secure Nested Paging Firmware ABI Specification section 4.3
-# unspecified or == 0 --> 0x30000 i.e. Bit#17 is '1' and Bit#16 is '1' (SMT is allowed)
-DEFSNPGUESTPOLICY ?= 0x30000
-
 SED = sed
 
 CLI_DIR = cmd
@@ -372,18 +366,6 @@ ifneq (,$(QEMUCMD))
 
     CONFIGS += $(CONFIG_REMOTE)
 
-    CONFIG_FILE_CLH_SNP = configuration-clh-snp.toml
-    CONFIG_CLH_SNP = config/$(CONFIG_FILE_CLH_SNP)
-    CONFIG_CLH_SNP_IN = $(CONFIG_CLH_SNP).in
-
-    CONFIG_PATH_CLH_SNP = $(abspath $(CONFDIR)/$(CONFIG_FILE_CLH_SNP))
-    CONFIG_PATHS += $(CONFIG_PATH_CLH_SNP)
-
-    SYSCONFIG_CLH_SNP = $(abspath $(SYSCONFDIR)/$(CONFIG_FILE_CLH_SNP))
-    SYSCONFIG_PATHS += $(SYSCONFIG_CLH_SNP)
-
-    CONFIGS += $(CONFIG_CLH_SNP)
-
     # qemu-specific options (all should be suffixed by "_QEMU")
     DEFBLOCKSTORAGEDRIVER_QEMU := virtio-scsi
     DEFBLOCKDEVICEAIO_QEMU := io_uring
@@ -421,6 +403,18 @@ ifneq (,$(CLHCMD))
     SYSCONFIG_PATHS += $(SYSCONFIG_CLH)
 
     CONFIGS += $(CONFIG_CLH)
+
+    CONFIG_FILE_CLH_SNP = configuration-clh-snp.toml
+    CONFIG_CLH_SNP = config/$(CONFIG_FILE_CLH_SNP)
+    CONFIG_CLH_SNP_IN = $(CONFIG_CLH_SNP).in
+
+    CONFIG_PATH_CLH_SNP = $(abspath $(CONFDIR)/$(CONFIG_FILE_CLH_SNP))
+    CONFIG_PATHS += $(CONFIG_PATH_CLH_SNP)
+
+    SYSCONFIG_CLH_SNP = $(abspath $(SYSCONFDIR)/$(CONFIG_FILE_CLH_SNP))
+    SYSCONFIG_PATHS += $(SYSCONFIG_CLH_SNP)
+
+    CONFIGS += $(CONFIG_CLH_SNP)
 
     # CLH-specific options (all should be suffixed by "_CLH")
     # currently, huge pages are required for virtiofsd support
@@ -710,9 +704,6 @@ USER_VARS += DEFBINDMOUNTS
 USER_VARS += DEFSERVICEOFFLOAD
 USER_VARS += DEFVFIOMODE
 USER_VARS += BUILDFLAGS
-USER_VARS += DEFSNPGUESTPOLICY
-USER_VARS += DEFSNPGUEST
-
 
 V              = @
 Q              = $(V:1=)
