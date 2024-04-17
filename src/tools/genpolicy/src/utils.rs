@@ -71,6 +71,9 @@ struct CommandLineOptions {
         require_equals= true
     )]
     containerd_socket_path: Option<String>,
+
+    #[clap(short, long, help = "Print version information and exit")]
+    version: bool,
 }
 
 /// Application configuration, derived from on command line parameters.
@@ -87,6 +90,7 @@ pub struct Config {
     pub raw_out: bool,
     pub base64_out: bool,
     pub containerd_socket_path: Option<String>,
+    pub version: bool,
 }
 
 impl Config {
@@ -102,6 +106,7 @@ impl Config {
             raw_out: args.raw_out,
             base64_out: args.base64_out,
             containerd_socket_path: args.containerd_socket_path,
+            version: args.version,
         }
     }
 }
