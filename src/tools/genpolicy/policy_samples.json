@@ -35,6 +35,7 @@
                 "kubernetes/incomplete-init/cockroachdb-statefulset.yaml",
                 "pod/pod-exec.yaml",
                 "pod/pod-lifecycle.yaml",
+                "pod/pod-many-layers.yaml",
                 "pod/pod-one-container.yaml",
                 "pod/pod-persistent-volumes.yaml",
                 "pod/pod-same-containers.yaml",
