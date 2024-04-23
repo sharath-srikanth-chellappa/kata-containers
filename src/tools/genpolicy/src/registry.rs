@@ -438,7 +438,7 @@ async fn create_decompressed_layer_file(
     Ok(())
 }
 
-fn get_verity_hash_value(path: &Path) -> Result<String> {
+pub fn get_verity_hash_value(path: &Path) -> Result<String> {
     info!("Calculating dm-verity root hash");
     let mut file = std::fs::File::open(path)?;
     let size = file.seek(std::io::SeekFrom::End(0))?;
