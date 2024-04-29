@@ -1,4 +1,4 @@
-from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
 import os
 import subprocess
 import sys
@@ -19,42 +19,56 @@ needs_containerd_pull = samples["needs_containerd_pull"]
 file_base_path = "../../agent/samples/policy/yaml"
 
 def runCmd(arg):
-    return subprocess.run([arg], stdout=sys.stdout, stderr=sys.stderr, universal_newlines=True, input="", shell=True)
+    return subprocess.run([arg], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, input="", shell=True, check=True)
 
 def timeRunCmd(arg):
+    log = [f"========== COMMAND: {arg}"]
     start = time.time()
-    proc = runCmd(arg)
-    end = time.time()
 
-    log = f"COMMAND: {arg}\n"
-    if proc.returncode != 0:
-        log += f"`{arg}` failed with exit code {proc.returncode}. Stderr: {proc.stderr}, Stdout: {proc.stdout}\n"
-    log += f"Time taken: {round(end - start, 2)} seconds"
-    print(log)
+    try:
+        p = runCmd(arg)
+    except subprocess.CalledProcessError as e:
+        log.append(e.stdout)
+        log.append(f"+++++ Failed with exit code {e.returncode}")
+        raise
+    else:
+        if p.stdout:
+            log.append(p.stdout)
+    finally:
+        end = time.time()
+        log.append(f"Time taken: {round(end - start, 2)} seconds")
+        print("\n".join(log))
 
 # check we can access all files we are about to update
 for file in default_yamls + silently_ignored + no_policy:
     filepath = os.path.join(file_base_path, file)
     if not os.path.exists(filepath):
-        print(f"filepath does not exists: {filepath}")
+        sys.exit(f"filepath does not exists: {filepath}")
 
 # build tool
-print("COMMAND: cargo build")
-runCmd("cargo build")
+print("========== COMMAND: LIBC=gnu BUILD_TYPE= make")
+runCmd("LIBC=gnu BUILD_TYPE= make")
 
 # update files
-genpolicy_path = "target/debug/genpolicy"
+genpolicy_path = "./target/x86_64-unknown-linux-gnu/debug/genpolicy"
 
 total_start = time.time()
-executor = ThreadPoolExecutor(max_workers=os.cpu_count())
 
-for file in default_yamls + no_policy + needs_containerd_pull:
-    executor.submit(timeRunCmd, f"sudo {genpolicy_path} -d -y {os.path.join(file_base_path, file)}")
+with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+    futures = []
 
-for file in silently_ignored:
-    executor.submit(timeRunCmd, f"sudo {genpolicy_path} -d -s -y {os.path.join(file_base_path, file)}")
+    for file in default_yamls + no_policy + needs_containerd_pull:
+        cmd = f"sudo {genpolicy_path} -d -y {os.path.join(file_base_path, file)}"
+        futures.append(executor.submit(timeRunCmd, cmd))
 
-executor.shutdown()
+    for file in silently_ignored:
+        cmd = f"sudo {genpolicy_path} -d -s -y {os.path.join(file_base_path, file)}"
+        futures.append(executor.submit(timeRunCmd, cmd))
+
+    for future in concurrent.futures.as_completed(futures):
+        # Surface any potential exception thrown by the future.
+        future.result()
+
 total_end = time.time()
 
 print(f"Total time taken: {total_end - total_start} seconds")
