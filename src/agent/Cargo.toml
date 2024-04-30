@@ -19,7 +19,7 @@ serde_json = "1.0.39"
 scan_fmt = "0.2.3"
 scopeguard = "1.0.0"
 thiserror = "1.0.26"
-regex = "1.5.6"
+regex = "1.10.4"
 serial_test = "0.5.1"
 kata-sys-util = { path = "../libs/kata-sys-util" }
 kata-types = { path = "../libs/kata-types" }
@@ -60,7 +60,14 @@ log = "0.4.11"
 cfg-if = "1.0.0"
 prometheus = { version = "0.13.0", features = ["process"] }
 procfs = "0.12.0"
-anyhow = "1.0.32"
+
+# anyhow is currently locked at 1.0.58 because:
+# - Versions between 1.0.59 - 1.0.76 have not been tested yet using Kata CI.
+#   However, those versions are passing "make test" for the Kata Agent.
+# - Versions 1.0.77 or newer fail during "make test" - see
+#   https://github.com/kata-containers/kata-containers/issues/9538
+anyhow = "=1.0.58"
+
 cgroups = { package = "cgroups-rs", version = "0.3.3" }
 
 # Tracing
@@ -75,16 +82,14 @@ serde = { version = "1.0.129", features = ["derive"] }
 toml = "0.5.8"
 clap = { version = "3.0.1", features = ["derive"] }
 
-# Communication with the OPA service
-http = { version = "0.2.8", optional = true }
-reqwest = { version = "0.11.14", optional = true }
-# The "vendored" feature for openssl is required for musl build
-openssl = { version = "0.10.54", features = ["vendored"], optional = true }
-
 # Policy validation
 sha2 = { version = "0.10.6", optional = true }
 hex = { version = "0.4.2", optional = true }
 sev = { git = "https://github.com/virtee/sev", version = "1.2", default-features = false, features = ["snp"], optional = true }
+
+# Agent Policy
+# TODO: use regorus version 0.1.5 when it will be released to crates.io.
+regorus = { git = "https://github.com/anakrish/regorus", rev = "fc6f5d4", default-features = false, features = ["arc", "base64", "base64url", "regex"], optional = true }
 
 [dev-dependencies]
 tempfile = "3.1.0"
@@ -103,7 +108,7 @@ lto = true
 default = []
 seccomp = ["rustjail/seccomp"]
 standard-oci-runtime = ["rustjail/standard-oci-runtime"]
-agent-policy = ["hex", "http", "openssl", "reqwest", "sev", "sha2"]
+agent-policy = ["hex", "regorus", "sev", "sha2"]
 
 [[bin]]
 name = "kata-agent"
