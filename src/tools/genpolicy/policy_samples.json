@@ -70,6 +70,7 @@
                 "kubernetes/fixtures/quota.yaml"
         ],
         "needs_containerd_pull": [
-                "kubernetes/fixtures/rc-nginxhttps.yaml"
+                "kubernetes/fixtures/rc-nginxhttps.yaml",
+                "pod/pod-many-layers.yaml"
         ]
 }
