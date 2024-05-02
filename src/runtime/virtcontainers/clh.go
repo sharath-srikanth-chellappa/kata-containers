@@ -760,11 +760,10 @@ func (clh *cloudHypervisor) StartVM(ctx context.Context, timeout int) error {
 		}
 	}()
 
-	pid, err := clh.launchClh()
+	err = clh.launchClh()
 	if err != nil {
 		return fmt.Errorf("failed to launch cloud-hypervisor: %q", err)
 	}
-	clh.state.PID = pid
 
 	bootvm_timeout := clh.getClhAPITimeout()
 	// TODO: review this 10 second minimum timeout value.
@@ -1421,11 +1420,13 @@ func (clh *cloudHypervisor) clhPath() (string, error) {
 	return p, err
 }
 
-func (clh *cloudHypervisor) launchClh() (int, error) {
+func (clh *cloudHypervisor) launchClh() error {
+
+	clh.state.PID = -1
 
 	clhPath, err := clh.clhPath()
 	if err != nil {
-		return -1, err
+		return err
 	}
 
 	args := []string{cscAPIsocket, clh.state.apiSocket}
@@ -1482,15 +1483,17 @@ func (clh *cloudHypervisor) launchClh() (int, error) {
 
 	err = utils.StartCmd(cmdHypervisor)
 	if err != nil {
-		return -1, err
+		return err
 	}
+
+	clh.state.PID = cmdHypervisor.Process.Pid
 
 	if err := clh.waitVMM(clhTimeout); err != nil {
 		clh.Logger().WithError(err).Warn("cloud-hypervisor init failed")
-		return -1, err
+		return err
 	}
 
-	return cmdHypervisor.Process.Pid, nil
+	return nil
 }
 
 //###########################################################################
@@ -1540,7 +1543,12 @@ func (clh *cloudHypervisor) isClhRunning(timeout uint) (bool, error) {
 	timeStart := time.Now()
 	cl := clh.client()
 	for {
-		err := syscall.Kill(pid, syscall.Signal(0))
+		waitedPid, err := syscall.Wait4(pid, nil, syscall.WNOHANG, nil)
+		if waitedPid == pid && err == nil {
+			return false, nil
+		}
+
+		err = syscall.Kill(pid, syscall.Signal(0))
 		if err != nil {
 			return false, nil
 		}
