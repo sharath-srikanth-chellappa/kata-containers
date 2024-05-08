@@ -46,8 +46,14 @@ for file in default_yamls + silently_ignored + no_policy:
         sys.exit(f"filepath does not exists: {filepath}")
 
 # build tool
-print("========== COMMAND: LIBC=gnu BUILD_TYPE= make")
-runCmd("LIBC=gnu BUILD_TYPE= make")
+next_command = "LIBC=gnu BUILD_TYPE= make"
+print("========== COMMAND: " + next_command)
+runCmd(next_command)
+
+# allow all users to pull container images by using containerd
+next_command = "sudo chmod a+rw /var/run/containerd/containerd.sock"
+print("========== COMMAND: " + next_command)
+runCmd(next_command)
 
 # update files
 genpolicy_path = "./target/x86_64-unknown-linux-gnu/debug/genpolicy"
@@ -58,11 +64,11 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as execut
     futures = []
 
     for file in default_yamls + no_policy + needs_containerd_pull:
-        cmd = f"sudo {genpolicy_path} -d -y {os.path.join(file_base_path, file)}"
+        cmd = f"{genpolicy_path} -d -y {os.path.join(file_base_path, file)}"
         futures.append(executor.submit(timeRunCmd, cmd))
 
     for file in silently_ignored:
-        cmd = f"sudo {genpolicy_path} -d -s -y {os.path.join(file_base_path, file)}"
+        cmd = f"{genpolicy_path} -d -s -y {os.path.join(file_base_path, file)}"
         futures.append(executor.submit(timeRunCmd, cmd))
 
     for future in concurrent.futures.as_completed(futures):
