@@ -67,12 +67,12 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as execut
 
     for file in default_yamls + no_policy + needs_containerd_pull:
         rego_file = "/tmp/" + Path(os.path.basename(file)).stem + "-rego.txt"
-        cmd = f"{genpolicy_path} -r -d -y {os.path.join(file_base_path, file)} > {rego_file}"
+        cmd = f"{genpolicy_path} -r -d -u -y {os.path.join(file_base_path, file)} > {rego_file}"
         futures.append(executor.submit(timeRunCmd, cmd))
 
     for file in silently_ignored:
         rego_file = "/tmp/" + Path(os.path.basename(file)).stem + "-rego.txt"
-        cmd = f"{genpolicy_path} -r -d -s -y {os.path.join(file_base_path, file)} > {rego_file}"
+        cmd = f"{genpolicy_path} -r -d -u -s -y {os.path.join(file_base_path, file)} > {rego_file}"
         futures.append(executor.submit(timeRunCmd, cmd))
 
     for future in concurrent.futures.as_completed(futures):
