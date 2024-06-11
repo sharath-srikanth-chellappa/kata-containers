@@ -31,9 +31,9 @@ TARGET_IGVM_DEBUG_MSMT:= $(IGVM_BUILD_DEST)/igvm-debug-measurement.cose
 TARGET_IGVM_LOG       := $(IGVM_BUILD_DEST)/igvm.log
 
 VERSION_FILE   := ./VERSION
-VERSION        := $(shell grep -v ^\# $(VERSION_FILE))
-COMMIT_NO      := $(shell git rev-parse HEAD 2> /dev/null || true)
-COMMIT         := $(if $(shell git status --porcelain --untracked-files=no),${COMMIT_NO}-dirty,${COMMIT_NO})
+VERSION        := $(shell grep -v ^\# $(VERSION_FILE) 2>/dev/null || echo "unknown")
+COMMIT_NO      := $(shell git rev-parse HEAD 2>/dev/null || true)
+COMMIT         := $(if $(shell git status --porcelain --untracked-files=no 2>/dev/null || true),${COMMIT_NO}-dirty,${COMMIT_NO})
 VERSION_COMMIT := $(if $(COMMIT),$(VERSION)-$(COMMIT),$(VERSION))
 
 ifeq ($(filter $(BUILD_METHOD),$(BUILD_METHOD_LIST)),)
