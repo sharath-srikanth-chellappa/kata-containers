@@ -70,9 +70,6 @@ spec:
   hostname: dns-querier-1
   nodeSelector:
     katacontainers.io/kata-runtime: "true"
-  overhead:
-    cpu: 250m
-    memory: 160Mi
   preemptionPolicy: PreemptLowerPriority
   priority: 0
   restartPolicy: Always
