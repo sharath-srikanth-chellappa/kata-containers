@@ -6,7 +6,6 @@
                 "deployment/deployment-azure-vote-back.yaml",
                 "deployment/deployment-azure-vote-front.yaml",
                 "deployment/deployment-busybox.yaml",
-                "deployment/deployment-docker-busybox.yaml",
                 "job/test-job.yaml",
                 "job/test-job2.yaml",
                 "kubernetes/conformance/conformance-e2e.yaml",
@@ -72,5 +71,10 @@
         "needs_containerd_pull": [
                 "kubernetes/fixtures/rc-nginxhttps.yaml",
                 "pod/pod-many-layers.yaml"
+        ],
+        "common_images": [
+                "busybox:latest",
+                "nginx:latest",
+                "ubuntu:latest"
         ]
 }
