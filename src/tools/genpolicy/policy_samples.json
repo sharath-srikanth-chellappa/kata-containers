@@ -29,9 +29,6 @@
                 "kubernetes/fixtures/replication.yaml",
                 "kubernetes/fixtures2/rc-service.yaml",
                 "kubernetes/fixtures2/valid-pod.yaml",
-                "kubernetes/incomplete-init/cassandra-statefulset.yaml",
-                "kubernetes/incomplete-init/controller.yaml",
-                "kubernetes/incomplete-init/cockroachdb-statefulset.yaml",
                 "pod/pod-exec.yaml",
                 "pod/pod-lifecycle.yaml",
                 "pod/pod-one-container.yaml",
@@ -45,6 +42,11 @@
                 "secrets/azure-file-secrets.yaml",
                 "stateful-set/web.yaml",
                 "stateful-set/web2.yaml"
+        ],
+        "incomplete_init": [
+                "kubernetes/incomplete-init/cassandra-statefulset.yaml",
+                "kubernetes/incomplete-init/controller.yaml",
+                "kubernetes/incomplete-init/cockroachdb-statefulset.yaml"
         ],
         "silently_ignored": [
                 "webhook/webhook-pod1.yaml",
