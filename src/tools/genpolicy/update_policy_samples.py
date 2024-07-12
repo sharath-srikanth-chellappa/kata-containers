@@ -14,6 +14,7 @@ with open('policy_samples.json') as f:
     samples = json.load(f)
 
 default_yamls = samples["default"]
+incomplete_init = samples["incomplete_init"]
 silently_ignored = samples["silently_ignored"]
 no_policy = samples["no_policy"]
 needs_containerd_pull = samples["needs_containerd_pull"]
@@ -42,7 +43,7 @@ def timeRunCmd(arg):
         print("\n".join(log))
 
 # check we can access all files we are about to update
-for file in default_yamls + silently_ignored + no_policy:
+for file in default_yamls + incomplete_init + silently_ignored + no_policy:
     filepath = os.path.join(file_base_path, file)
     if not os.path.exists(filepath):
         sys.exit(f"filepath does not exists: {filepath}")
@@ -65,7 +66,7 @@ total_start = time.time()
 with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
     futures = []
 
-    for file in default_yamls + no_policy + needs_containerd_pull:
+    for file in default_yamls + incomplete_init + no_policy + needs_containerd_pull:
         rego_file = "/tmp/" + Path(os.path.basename(file)).stem + "-rego.txt"
         cmd = f"{genpolicy_path} -r -d -u -y {os.path.join(file_base_path, file)} > {rego_file}"
         futures.append(executor.submit(timeRunCmd, cmd))
