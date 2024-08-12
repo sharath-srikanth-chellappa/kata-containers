@@ -8,6 +8,7 @@ use log::{debug, info};
 mod agent;
 mod config_map;
 mod containerd;
+mod cronjob;
 mod daemon_set;
 mod deployment;
 mod job;

@@ -3,6 +3,7 @@
                 "configmap/pod-cm1.yaml",
                 "configmap/pod-cm2.yaml",
                 "configmap/pod-cm3.yaml",
+                "cron-job/test-cron-job.yaml",
                 "deployment/deployment-azure-vote-back.yaml",
                 "deployment/deployment-azure-vote-front.yaml",
                 "deployment/deployment-busybox.yaml",
