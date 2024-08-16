@@ -75,8 +75,8 @@
                 "pod/pod-many-layers.yaml"
         ],
         "common_images": [
-                "mcr.microsoft.com/cbl-mariner/busybox:1.35",
-                "mcr.microsoft.com/cbl-mariner/base/nginx:1",
+                "mcr.microsoft.com/azurelinux/busybox:1.36",
+                "mcr.microsoft.com/azurelinux/base/nginx:1.25",
                 "mcr.microsoft.com/mirror/docker/library/ubuntu:noble"
         ]
 }
