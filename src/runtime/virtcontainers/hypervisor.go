@@ -549,6 +549,9 @@ type HypervisorConfig struct {
 	// root port, switch or no port
 	ColdPlugVFIO config.PCIePort
 
+	// Number of SRIOV interfaces consumed by the VM.
+	SRIOV uint32
+
 	// NumVCPUs specifies default number of vCPUs for the VM.
 	NumVCPUsF float32
 
@@ -579,6 +582,9 @@ type HypervisorConfig struct {
 
 	// Name of Volume
 	VolumeName string
+
+	// Type of VM to be created
+	VMType string
 
 	// User ID.
 	Uid uint32
