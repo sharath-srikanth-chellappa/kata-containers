@@ -796,7 +796,7 @@ func newSandbox(ctx context.Context, sandboxConfig SandboxConfig, factory Factor
 	// 	}()
 
 	// }
-	
+
 	logrus.Debug("newSandbox Coming here - 11")
 	if len(sandboxConfig.Containers) > 0 {
 		// These values are required by remote hypervisor
@@ -1614,21 +1614,8 @@ func (s *Sandbox) startVM(ctx context.Context, prestartHookFunc func(context.Con
 		return err
 	}
 
-<<<<<<< HEAD
 	if caps.IsNetworkDeviceHotplugSupported() && prestartHookFunc != nil {
 		err = s.runPrestartHooks(ctx, prestartHookFunc)
-=======
-	// not sure how we know that this callback has been executed
-	if s.config.HypervisorConfig.ConfidentialGuest && s.config.HypervisorConfig.GuestPreAttestation {
-		if err := s.hypervisor.AttestVM(ctx); err != nil {
-			s.Logger().Infof("Error 1 %s", err)
-			return err
-		}
-	}
-
-	if prestartHookFunc != nil {
-		hid, err := s.GetHypervisorPid()
->>>>>>> 1452cbb1b (initial commit, end of internship)
 		if err != nil {
 			s.Logger().Infof("Error 2 %s", err)
 			return err
@@ -2934,7 +2921,7 @@ func fetchSandbox(ctx context.Context, sandboxID string) (sandbox *Sandbox, err 
 	config.HypervisorConfig.SandboxID = sandboxID
 	config.VfioMode = 1
 	config.StaticResourceMgmt = true
-	config.ServiceOffload = true
+	// config.ServiceOffload = true
 	config.HypervisorConfig.SharedPath = filepath.Join(kataHostSharedDir(), sandboxID, "shared")
 	config.HypervisorConfig.DisableGuestSeLinux = true
 	config.HypervisorConfig.RemoteHypervisorSocket = "/run/peerpod/hypervisor.sock"

@@ -433,7 +433,7 @@ func (s *service) Create(ctx context.Context, r *taskAPI.CreateTaskRequest) (_ *
 			// return nil, res.err
 		}
 
-		container.status = task.StatusCreated
+		container.status = task.Status_CREATED
 
 		s.containers[r.ID] = container
 
@@ -485,7 +485,7 @@ func (s *service) Start(ctx context.Context, r *taskAPI.StartRequest) (_ *taskAP
 	}
 
 	// pretend the container is actually running
-	c.status = task.StatusRunning
+	c.status = task.Status_RUNNING
 
 	// hold the send lock so that the start events are sent before any exit events in the error case
 	s.eventSendMu.Lock()
@@ -579,8 +579,8 @@ func (s *service) Delete(ctx context.Context, r *taskAPI.DeleteRequest) (_ *task
 	delete(c.execs, r.ExecID)
 
 	return &taskAPI.DeleteResponse{
-		ExitStatus: 0,          // uint32(execs.exitCode),
-		ExitedAt:   time.Now(), // execs.exitTime,
+		ExitStatus: 0,                           // uint32(execs.exitCode),
+		ExitedAt:   timestamppb.New(time.Now()), // execs.exitTime,
 		Pid:        s.hpid,
 	}, nil
 }
@@ -707,7 +707,7 @@ func (s *service) State(ctx context.Context, r *taskAPI.StateRequest) (_ *taskAP
 		return &taskAPI.StateResponse{
 			ID:     r.ID,
 			Pid:    s.hpid,
-			Status: task.StatusCreated,
+			Status: task.Status_CREATED,
 		}, nil
 	}
 
@@ -860,14 +860,14 @@ func (s *service) Kill(ctx context.Context, r *taskAPI.KillRequest) (_ *emptypb.
 		ID:          c.id,
 		Pid:         0,
 		ExitStatus:  0,
-		ExitedAt:    time.Now(),
+		ExitedAt:    timestamppb.New(time.Now()),
 	})
 
 	_, err = s.Cleanup(ctx)
 	logrus.WithField("Exit code", err).Info("exiting with")
 
 	logrus.Debug("Setting Task Status to stopped - service.go")
-	c.status = task.StatusStopped
+	c.status = task.Status_STOPPED
 	// return empty, nil
 
 	processStatus := c.status
