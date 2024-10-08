@@ -529,6 +529,9 @@ type HypervisorConfig struct {
 	// root port, switch or no port
 	ColdPlugVFIO config.PCIePort
 
+	// Number of SRIOV interfaces consumed by the VM.
+	SRIOV uint32
+
 	// NumVCPUs specifies default number of vCPUs for the VM.
 	NumVCPUs uint32
 
@@ -556,6 +559,12 @@ type HypervisorConfig struct {
 
 	// Size of virtqueues
 	VirtioFSQueueSize uint32
+
+	// Name of Volume
+	VolumeName string
+
+	// Type of VM to be created
+	VMType string
 
 	// User ID.
 	Uid uint32
@@ -656,6 +665,7 @@ type HypervisorConfig struct {
 
 	RemoteHypervisorSocket  string
 	RemoteHypervisorTimeout uint32
+	SandboxID               string
 	SandboxName             string
 	SandboxNamespace        string
 
@@ -1029,6 +1039,8 @@ type Hypervisor interface {
 
 	// If wait is set, don't actively stop the sandbox:
 	// just perform cleanup.
+	// StopVM(ctx context.Context, waitOnly bool) error
+	// Sharath: new code
 	StopVM(ctx context.Context, waitOnly bool) error
 	PauseVM(ctx context.Context) error
 	SaveVM() error

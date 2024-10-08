@@ -472,6 +472,14 @@ func addHypervisorConfigOverrides(ocispec specs.Spec, config *vc.SandboxConfig, 
 		return err
 	}
 
+	addHypervisorVolumeNameOverrides(ocispec, config)
+
+	if err := addHypervisorSRIOVOverrides(ocispec, config); err != nil {
+		return err
+	}
+
+	addHypervisorVMTypeOverrides(ocispec, config)
+
 	if value, ok := ocispec.Annotations[vcAnnotations.MachineType]; ok {
 		if value != "" {
 			config.HypervisorConfig.HypervisorMachineType = value
@@ -612,6 +620,34 @@ func addHypervisorHotColdPlugVfioOverrides(ocispec specs.Spec, sbConfig *vc.Sand
 		sbConfig.HypervisorConfig.HotPlugVFIO = config.NoPort
 	}
 	return nil
+}
+
+func addHypervisorVolumeNameOverrides(ocispec specs.Spec, sbConfig *vc.SandboxConfig) {
+	if value, ok := ocispec.Annotations[vcAnnotations.VolumeName]; ok {
+		if value != "" {
+			sbConfig.HypervisorConfig.VolumeName = value
+		}
+	}
+}
+
+func addHypervisorSRIOVOverrides(ocispec specs.Spec, sbConfig *vc.SandboxConfig) error {
+	if _, ok := ocispec.Annotations[vcAnnotations.SRIOV]; ok {
+		if err := newAnnotationConfiguration(ocispec, vcAnnotations.SRIOV).setUintWithCheck(func(sriovDevices uint64) error {
+			sbConfig.HypervisorConfig.SRIOV = uint32(sriovDevices)
+			return nil
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func addHypervisorVMTypeOverrides(ocispec specs.Spec, sbConfig *vc.SandboxConfig) {
+	if value, ok := ocispec.Annotations[vcAnnotations.VMType]; ok {
+		if value != "" {
+			sbConfig.HypervisorConfig.VMType = value
+		}
+	}
 }
 
 func addHypervisorMemoryOverrides(ocispec specs.Spec, sbConfig *vc.SandboxConfig, runtime RuntimeConfig) error {
